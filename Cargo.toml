@@ -1,5 +1,5 @@
 [package]
-name = "mips-vm"
+name = "risc5-vm"
 version = "0.1.0"
 edition = "2021"
 
