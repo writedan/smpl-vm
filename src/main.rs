@@ -12,7 +12,8 @@ enum Instruction {
 	Continue,		// jump to matching [ if memory is nonzero
 	Jump,			// set pointer to value in memory
 	Return,			// restore pointer to value before jump
-	Alloc			// with the value of memory, jump to first instance of that many 0s in memory
+	Alloc,			// with the value of memory, jump to first instance of that many 0s in memory
+	Nop				// no operation
 }
 
 fn main() {
@@ -35,7 +36,7 @@ fn main() {
 			'*' => Instruction::Jump,
 			'&' => Instruction::Return,
 			'?' => Instruction::Alloc,
-			_ => panic!("No such instruction: {}", instruction)
+			_ => Instruction::Nop // specification defiens other symbols to be ignored
 		};
 
 		instr.push(instruction);
