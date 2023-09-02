@@ -19,7 +19,7 @@ fn main() {
 	let args: Vec<String> = env::args().collect();
 	let code = &args[1];
 
-	let mut memory: [u8; u8::max_value() as usize] = [0; u8::max_value() as usize];
+	let mut memory: Vec<u8> = Vec::with_capacity(u16::max_value() as usize);
 	let mut instr: Vec<Instruction> = Vec::with_capacity(code.len());
 
 	for instruction in code.chars() {
