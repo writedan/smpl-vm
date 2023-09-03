@@ -42,6 +42,7 @@ fn main() {
 		instr.push(instruction);
 	}
 
+	let mut ptr_jumps: Vec<usize> = vec![0, u16::max_value() as usize];
 	let mut pointer: usize = 0;
 
 	println!("{:?}", instr);
@@ -60,6 +61,13 @@ fn main() {
 				_ => memory[pointer] -= 1
 			},
 			Instruction::Output => println!("{:?}", memory[pointer] as char),
+			Instruction::Jump => {
+				ptrJumps.push(pointer);
+				pointer = memory[pointer] as usize;
+			},
+			Instruction::Return => {
+				pointer = ptr_jumps.pop().unwrap();
+			},
 			_ => pointer += 0
 		}
 	}
