@@ -20,7 +20,7 @@ fn main() {
 	let args: Vec<String> = env::args().collect();
 	let code = &args[1];
 
-	let mut memory: Vec<u8> = Vec::with_capacity(u16::max_value() as usize);
+	let mut memory: Vec<u8> = vec![0; u16::max_value() as usize];
 	let mut instr: Vec<Instruction> = Vec::with_capacity(code.len());
 
 	for instruction in code.chars() {
@@ -43,4 +43,24 @@ fn main() {
 	}
 
 	let mut pointer: usize = 0;
+
+	println!("{:?}", instr);
+
+
+	for instruction in instr {
+		match instruction {
+			Instruction::MoveRight => pointer += 1,
+			Instruction::MoveLeft => match pointer {
+				0 => pointer = usize::max_value(),
+				_ => pointer -= 1
+			},
+			Instruction::Increment => memory[pointer] += 1,
+			Instruction::Decrement => match memory[pointer] {
+				0 => memory[pointer] = u8::max_value(),
+				_ => memory[pointer] -= 1
+			},
+			Instruction::Output => println!("{:?}", memory[pointer] as char),
+			_ => pointer += 0
+		}
+	}
 }
