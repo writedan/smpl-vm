@@ -18,7 +18,7 @@ pub mod vm {
 	impl Program {
 		pub fn load(program: Vec<Token>) -> Program {
 			Program {
-				instructions: Vec::new(),
+				instructions: parse(program).unwrap(),
 				branches: BiMap::new(),
 				jumps: Vec::new(),
 				vm: Machine {

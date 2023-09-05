@@ -28,6 +28,5 @@ fn main() {
 
     let code: Vec<String> = io::BufReader::new(file).lines().map(|l| l.expect("Could not parse line.")).collect();
 
-    let program = Program::load(lexify(code));
-
+    let mut program = Program::load(lexify(code));
 }

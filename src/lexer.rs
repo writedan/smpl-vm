@@ -1,6 +1,6 @@
 pub mod lexer {
 
-	#[derive(PartialEq, Debug)]
+	#[derive(PartialEq, Debug, Copy, Clone)]
 	pub enum Token {
 		MoveRight(usize, usize),		// pointer += 1
 		MoveLeft(usize, usize),			// pointer -= 1
