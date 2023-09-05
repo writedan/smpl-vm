@@ -72,6 +72,16 @@ pub mod vm {
 						} // otherwise do nothing
 					},
 
+					Instruction::Jump => {
+						self.machine.jumps.push(self.machine.pointer);
+						self.machine.pointer = self.machine.memory[self.machine.pointer] as usize;
+					},
+
+
+					Instruction::Return => {
+						self.machine.pointer = self.machine.jumps.pop().unwrap();
+					}
+
 					_ => println!("{:?}", i)
 				}
 
