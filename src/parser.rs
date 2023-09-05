@@ -79,7 +79,7 @@ pub mod parser {
 				},
 
 				Token::Nop(line, character) => {
-					return Err((format!("Unexpected token {:?} encountered on line {} at {} !!!", token, line, character), *line, *character));
+					return Err((format!("Unexpected token {:?} encountered on line {} at {}", token, line, character), *line, *character));
 				}
 			}
 
