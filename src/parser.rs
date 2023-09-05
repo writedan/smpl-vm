@@ -3,17 +3,17 @@ pub mod parser {
 
 	#[derive(Debug, PartialEq)]
 	pub enum Instruction {
-		MoveRight,		// increment the pointer by one
-		MoveLeft,		// decrement the pointer by one
-		Increment,		// increment the memory at pointer by one
-		Decrement,		// decrement the memory at pointer by one
-		Output,			// output byte from memory
-		Input,			// input byte into memory
-		Loop,			// jump past the matching ] if memory is zero
-		Continue,		// jump to matching [ if memory is nonzero
-		Jump,			// set pointer to value in memory
+		MoveRight,		// pointer += 1
+		MoveLeft,		// pointer -= 1
+		Increment,		// memory[pointer] += 1
+		Decrement,		// memory[pointer] -= 1
+		Output,			// print memory[pointer]
+		Input,			// memory[pointer] input
+		Loop,			// jump past the matching ] if memory[pointer] = 0
+		Continue,		// jump to matching [ if memory[pointer] > 0
+		Jump,			// pointer = memory[pointer]
 		Return,			// restore pointer to value before jump
-		Alloc,			// with the value of memory, jump to first instance of that many 0s in memory
+		Alloc,			// with the value of memory, set memory[pointer] to address of first instance of that many free spaces, defined as memory[pointer] = 0
 		Nop				// no operation
 	}
 
