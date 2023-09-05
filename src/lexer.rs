@@ -1,4 +1,5 @@
 pub mod lexer {
+	use std::mem::{discriminant,Discriminant};
 
 	#[derive(PartialEq, Debug, Copy, Clone)]
 	pub enum Token {
@@ -13,7 +14,7 @@ pub mod lexer {
 		Jump(usize, usize),				// pointer = memory[pointer]
 		Restore(usize, usize),			// restore pointer to value before jump
 		Alloc(usize, usize),			// memory[pointer] = address of first `memory[pointer]` empty cells
-		Nop								// placeholder empty value, will be pruned
+		Nop	(usize, usize)				// placeholder empty value, will be pruned
 	} // fields are (line, character)
 
 	pub fn lexify(code: Vec<String>) -> Vec<Token> {
@@ -33,11 +34,11 @@ pub mod lexer {
 					'*' => Token::Jump(line_num, idx),
 					'&' => Token::Restore(line_num, idx),
 					'?' => Token::Alloc(line_num, idx),
-					_ => Token::Nop
+					_ => Token::Nop(line_num, idx)
 				});
 			}
 		}
 
-		return tokens.into_iter().filter(|token| token != &Token::Nop).collect::<Vec<Token>>();
+		return tokens.into_iter().filter(|token| discriminant(token) != discriminant(&Token::Nop(0,0))).collect::<Vec<Token>>();
 	}
 }

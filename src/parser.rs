@@ -19,7 +19,7 @@ pub mod parser {
 		Alloc(Token),				// memory[pointer] = address of first `memory[pointer]` empty cells
 	} // usize field is how many times in a row the token appears; Token is a reference to the corresponding token for its line and character index
 
-	pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, String> {
+	pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, (String, usize, usize)> {
 		let mut instr: Vec<Instruction> = Vec::new();
 
 		let mut idx = 0;
@@ -44,11 +44,43 @@ pub mod parser {
 					instr.push(Instruction::Increment(num, *token));
 				},
 
-				Token::Output(line, character) => {
-					instr.push(Instruction::Output(*token));
+				Token::Decrement(line, chracter) => {
+					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
+					idx += num;
+					instr.push(Instruction::Decrement(num, *token));
 				}
 
-				_ => println!("unsupported token {:?}", token)
+				Token::Output(line, character) => {
+					instr.push(Instruction::Output(*token));
+				},
+
+				Token::Input(line, character) => {
+					instr.push(Instruction::Input(*token));
+				},
+
+				Token::Branch(line, character) => {
+					instr.push(Instruction::Branch(*token));
+				},
+
+				Token::Return(line, character) => {
+					instr.push(Instruction::Return(*token));
+				},
+
+				Token::Jump(line, character) => {
+					instr.push(Instruction::Jump(*token));
+				},
+
+				Token::Restore(line, character) => {
+					instr.push(Instruction::Restore(*token));
+				},
+
+				Token::Alloc(line, character) => {
+					instr.push(Instruction::Alloc(*token));
+				},
+
+				Token::Nop(line, character) => {
+					return Err((format!("Unexpected token {:?} encountered on line {} at {} !!!", token, line, character), *line, *character));
+				}
 			}
 
 			idx += 1;
