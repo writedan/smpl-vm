@@ -28,25 +28,25 @@ pub mod parser {
 			match token {
 				Token::MoveRight(line, character) => {
 					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-					idx += num;
+					idx += num - 1;
 					instr.push(Instruction::MoveRight(num, *token));
 				},
 
 				Token::MoveLeft(line, character) => {
 					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-					idx += num;
+					idx += num - 1;
 					instr.push(Instruction::MoveLeft(num, *token));
 				},
 
 				Token::Increment(line, character) => {
 					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-					idx += num;
+					idx += num - 1;
 					instr.push(Instruction::Increment(num, *token));
 				},
 
 				Token::Decrement(line, chracter) => {
 					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-					idx += num;
+					idx += num - 1;
 					instr.push(Instruction::Decrement(num, *token));
 				}
 
@@ -79,7 +79,7 @@ pub mod parser {
 				},
 
 				Token::Nop(line, character) => {
-					return Err((format!("Unexpected token {:?} encountered on line {} at {}", token, line, character), *line, *character));
+					return Err((format!("Unexpected token {:?} encountered", token), *line, *character));
 				}
 			}
 
@@ -128,7 +128,7 @@ pub mod parser {
 				if !branches.contains_left(&open) {
 					if let Instruction::Branch(token) = instruction {
 						if let Token::Branch(line, character) = token {
-							return Err((format!("Branch ('[') defined on line {} at {} has no return (']')", line, character), *line, *character));
+							return Err((format!("Branch ('[') has no return (']')"), *line, *character));
 						}
 					}
 				}
@@ -136,7 +136,7 @@ pub mod parser {
 				if !branches.contains_right(&position) {
 					if let Instruction::Return(token) = instruction {
 						if let Token::Return(line, character) = token {
-							return Err((format!("Return (']') defined on line {} at {} has no branch ('[')", line, character), *line, *character));
+							return Err((format!("Return (']') has no branch ('[')"), *line, *character));
 						}
 					}
 				}
