@@ -63,7 +63,7 @@ pub mod vm {
 						}
 					},
 
-					Instruction::Output => print!("{}", self.machine.memory[self.machine.pointer] as char),
+					Instruction::Output => print!("{:?}", self.machine.memory[self.machine.pointer] as char),
 
 					Instruction::Loop => {
 						if self.machine.memory[self.machine.pointer] == 0 {
@@ -86,6 +86,30 @@ pub mod vm {
 					Instruction::Return => {
 						self.machine.pointer = self.machine.jumps.pop().unwrap();
 					},
+
+					Instruction::Alloc => {
+						let space_req = self.machine.memory[self.machine.pointer];
+						let mut free = 0;
+						let mut space;
+						for (position, value) in self.machine.memory.iter().enumerate() {
+							if value == &0 {
+								free += 1;
+								space = position;
+							} else {
+								free = 0;
+								space = 0;
+							}
+
+							if free == space_req {
+								self.machine.memory[self.machine.pointer] = space as u8;
+								break;
+							}
+						}
+
+						if free != space_req {
+							panic!("Insufficient memory was available to allocate {} bytes.", space_req);
+						}
+					}
 
 					Instruction::Nop => {},
 
