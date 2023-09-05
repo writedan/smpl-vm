@@ -17,7 +17,7 @@ pub mod lexer {
 		Nop	(usize, usize)				// placeholder empty value, will be pruned
 	} // fields are (line, character)
 
-	pub fn lexify(code: Vec<String>) -> Vec<Token> {
+	pub fn lexify(code: &Vec<String>) -> Vec<Token> {
 		let mut tokens: Vec<Token> = Vec::new();
 		for (idx, line) in code.iter().enumerate() {
 			let line_num = idx;
