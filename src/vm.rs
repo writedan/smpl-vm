@@ -1,6 +1,8 @@
 pub mod vm {
 	use crate::parser::parser::Instruction;
 	use bimap::BiMap;
+	use std::io::stdin;
+	use std::io::Read;
 
 	struct Vm {
 		memory: Vec<u8>,
@@ -63,7 +65,20 @@ pub mod vm {
 						}
 					},
 
-					Instruction::Output => print!("{:?}", self.machine.memory[self.machine.pointer] as char),
+					Instruction::Output => print!("{}", self.machine.memory[self.machine.pointer] as char),
+
+					Instruction::Input => {
+						let mut input: [u8; 1] = [0];
+						match stdin().read(&mut input) {
+							Ok(read) => {
+								self.machine.memory[self.machine.pointer] = input[0];
+							},
+
+							Err(error) => {
+								panic!("{:?}", error);
+							}
+						}
+					},
 
 					Instruction::Loop => {
 						if self.machine.memory[self.machine.pointer] == 0 {
@@ -111,9 +126,7 @@ pub mod vm {
 						}
 					}
 
-					Instruction::Nop => {},
-
-					_ => println!("{:?}", i)
+					Instruction::Nop => {}
 				}
 
 				idx += 1;
