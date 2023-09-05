@@ -42,7 +42,7 @@ pub mod vm {
 
 					Instruction::MoveLeft => {
 						if self.machine.pointer == 0 {
-							self.machine.pointer = usize::max_value();
+							self.machine.pointer = u16::max_value() as usize;
 						} else {
 							self.machine.pointer -= 1;
 						}
