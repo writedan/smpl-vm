@@ -58,7 +58,7 @@ pub mod vm {
 						}
 					},
 
-					Instruction::Output => print!("{:?}", self.machine.memory[self.machine.pointer]),
+					Instruction::Output => print!("{:?}", self.machine.memory[self.machine.pointer] as char),
 
 					Instruction::Loop => {
 						if self.machine.memory[self.machine.pointer] == 0 {
@@ -80,7 +80,7 @@ pub mod vm {
 
 					Instruction::Return => {
 						self.machine.pointer = self.machine.jumps.pop().unwrap();
-					}
+					},
 
 					_ => println!("{:?}", i)
 				}
