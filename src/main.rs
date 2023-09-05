@@ -1,26 +1,33 @@
-use std::env;
-
-pub mod vm;
+pub mod lexer;
 pub mod parser;
+pub mod vm;
+
+use crate::lexer::lexer::*;
 use crate::parser::parser::*;
-use crate::vm::vm::Program;
+use crate::vm::vm::*;
+use std::env;
+use std::fs::File;
+use std::io::{self, BufRead};
+use std::path::Path;
 
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
-	let code = args[1].chars().collect::<Vec<char>>();
+	if args.len() == 1 {
+		println!("Usage: smpl-vm <file>");
+		return;
+	}
 
-	let instructions: Vec<Instruction> = parse_instructions(code);
-	let branches = calculate_branches(&instructions).unwrap();
+	let path = Path::new(&args[1]);
+	let display = path.display();
 
-	let mut vm = Program::new(instructions, branches);
+	let mut file = match File::open(&path) {
+        Err(why) => panic!("Failed to open {}: {}", display, why),
+        Ok(file) => file,
+    };
 
-	println!("Instructions: {:?}", vm.instructions);
-	println!("Branch table: {:?}", vm.branches);
+    let code: Vec<String> = io::BufReader::new(file).lines().map(|l| l.expect("Could not parse line.")).collect();
 
-	println!("Begin execution:\n");
+    let program = Program::load(lexify(code));
 
-	vm.run();
-
-	println!();
 }
