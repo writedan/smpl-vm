@@ -38,11 +38,16 @@ pub mod vm {
 			while idx < self.instructions.len() {
 				let i = &self.instructions[idx];
 				match i {
-					Instruction::MoveRight => self.machine.pointer += 1,
+					Instruction::MoveRight => {
+						self.machine.pointer += 1;
+						if self.machine.pointer == u16::max_value() as usize {
+							self.machine.pointer = 0;
+						} // since pointer is indexed as usize, it can overflow
+					},
 
 					Instruction::MoveLeft => {
 						if self.machine.pointer == 0 {
-							self.machine.pointer = u16::max_value() as usize;
+							self.machine.pointer = (u16::max_value() as usize) - 1;
 						} else {
 							self.machine.pointer -= 1;
 						}
