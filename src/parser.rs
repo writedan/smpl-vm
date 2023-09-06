@@ -99,7 +99,7 @@ pub mod parser {
                     ));
                 }
             }
- 
+
             last_instruction = instr.last().unwrap();
             idx += 1;
         }

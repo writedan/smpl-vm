@@ -3,8 +3,8 @@ pub mod vm {
     use crate::parser::parser::*;
     use bimap::BiMap;
     use std::io::stdin;
-    use std::io::{Read, Write};
     use std::io::BufRead;
+    use std::io::{Read, Write};
 
     #[derive(Debug)]
     struct Machine {
@@ -89,24 +89,41 @@ pub mod vm {
                     Instruction::Output(token) => {
                         if self.vm.memory[self.vm.pointer] > u8::max_value() as usize {
                             if let Token::Output(line, character) = token {
-                                return Err((format!("Runtime error: mem[{}] = {} > {}", self.vm.pointer, self.vm.memory[self.vm.pointer], u8::max_value()), *line, *character));
-                            } 
+                                return Err((
+                                    format!(
+                                        "Runtime error: mem[{}] = {} > {}",
+                                        self.vm.pointer,
+                                        self.vm.memory[self.vm.pointer],
+                                        u8::max_value()
+                                    ),
+                                    *line,
+                                    *character,
+                                ));
+                            }
                         } else {
                             print!("{}", (self.vm.memory[self.vm.pointer] as u32) as u8 as char);
                             match std::io::stdout().flush() {
-                                Ok(_) => {},
-                                Err(msg) => {
-                                       if let Token::Output(line, character) = token {
-                                          return Err((format!("Runtime error flushing output: {}", msg), *line, *character));
-                                      }
-                                 }
-                             }
-
-                            match std::io::stdout().flush() {
-                                Ok(_) => {},
+                                Ok(_) => {}
                                 Err(msg) => {
                                     if let Token::Output(line, character) = token {
-                                        return Err((format!("Runtime error flushing output: {}", msg), *line, *character));
+                                        return Err((
+                                            format!("Runtime error flushing output: {}", msg),
+                                            *line,
+                                            *character,
+                                        ));
+                                    }
+                                }
+                            }
+
+                            match std::io::stdout().flush() {
+                                Ok(_) => {}
+                                Err(msg) => {
+                                    if let Token::Output(line, character) = token {
+                                        return Err((
+                                            format!("Runtime error flushing output: {}", msg),
+                                            *line,
+                                            *character,
+                                        ));
                                     }
                                 }
                             }
@@ -118,19 +135,23 @@ pub mod vm {
                         let stdin = std::io::stdin();
                         match stdin.lock().read_line(&mut line) {
                             Ok(_) => {
-                                line = format!("{}",line.trim());
+                                line = format!("{}", line.trim());
                                 match line.chars().nth(0) {
                                     Some(byte) => {
                                         self.vm.memory[self.vm.pointer] = byte as usize;
-                                    },
+                                    }
                                     None => {
                                         self.vm.memory[self.vm.pointer] = 0;
                                     }
                                 }
-                            },
+                            }
                             Err(msg) => {
                                 if let Token::Input(line, character) = token {
-                                    return Err((format!("Runtime error reading input: {}", msg), *line, *character));
+                                    return Err((
+                                        format!("Runtime error reading input: {}", msg),
+                                        *line,
+                                        *character,
+                                    ));
                                 }
                             }
                         }
