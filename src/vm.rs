@@ -113,7 +113,26 @@ pub mod vm {
 						if self.vm.memory[self.vm.pointer] != 0 {
 							idx = self.branches.get_by_right(&idx).unwrap() - 1;
 						}
-					}
+					},
+
+					Instruction::Jump(token) => {
+						self.jumps.push(self.vm.pointer);
+						self.vm.pointer = self.vm.memory[self.vm.pointer] as usize;
+					},
+
+					Instruction::Restore(token) => {
+						if let Some(jump) = self.jumps.pop() {
+							self.vm.pointer = jump;
+						} else {
+							if let Token::Restore(line, character) = token {
+								return Err((format!("Runtime error: no saved jumps."), *line, *character));
+							}
+						}
+					},
+
+					Instruction::Alloc(token) => {
+
+					},
 
 					_ => println!("todo: execute: {:?}", i)
 				}

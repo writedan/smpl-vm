@@ -30,7 +30,14 @@ fn main() {
 
     match Program::load(lexify(&code)) {
     	Ok(mut program) => {
-    		program.run();
+    		match program.run() {
+    			Err((msg, line, character)) => {
+    				println!("Encountered a runtime error on line {}", line + 1);
+    				println!("{}", code[line]);
+    				println!("{}^{} {}", "-".repeat(character), "-".repeat(code[line].len() - character -1), msg);
+    			},
+    			_ => {} // who cares
+    		}
     	},
     	Err((msg, line, character)) => {
     		println!("Encountered an error while parsing program on line {}.", line + 1);
