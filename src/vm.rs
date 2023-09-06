@@ -3,7 +3,8 @@ pub mod vm {
     use crate::parser::parser::*;
     use bimap::BiMap;
     use std::io::stdin;
-    use std::io::Read;
+    use std::io::{Read, Write};
+    use std::io::BufRead;
 
     #[derive(Debug)]
     struct Machine {
@@ -84,24 +85,36 @@ pub mod vm {
                         self.vm.memory[self.vm.pointer] -= num as u8;
                     }
 
-                    Instruction::Output(_) => {
+                    Instruction::Output(token) => {
                         print!("{}", self.vm.memory[self.vm.pointer] as char);
+                        match std::io::stdout().flush() {
+                            Ok(_) => {},
+                            Err(msg) => {
+                                if let Token::Output(line, character) = token {
+                                    return Err((format!("Runtime error flushing output: {}", msg), *line, *character));
+                                }
+                            }
+                        }
                     }
 
                     Instruction::Input(token) => {
-                        let mut input: [u8; 1] = [0];
-                        match stdin().read(&mut input) {
-                            Ok(_read) => {
-                                self.vm.memory[self.vm.pointer] = input[0];
-                            }
-
-                            Err(error) => {
-                                if let Token::Nop(line, character) = token {
-                                    return Err((
-                                        format!("Runtime error occurred getting input: {}", error),
-                                        *line,
-                                        *character,
-                                    ));
+                        let mut line = String::new();
+                        let stdin = std::io::stdin();
+                        match stdin.lock().read_line(&mut line) {
+                            Ok(_) => {
+                                line = format!("{}",line.trim());
+                                match line.bytes().nth(0) {
+                                    Some(byte) => {
+                                        self.vm.memory[self.vm.pointer] = byte;
+                                    },
+                                    None => {
+                                        self.vm.memory[self.vm.pointer] = 0;
+                                    }
+                                }
+                            },
+                            Err(msg) => {
+                                if let Token::Input(line, character) = token {
+                                    return Err((format!("Runtime error reading input: {}", msg), *line, *character));
                                 }
                             }
                         }
