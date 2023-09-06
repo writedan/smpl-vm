@@ -43,25 +43,24 @@ pub mod vm {
 		}
 
 		pub fn run(&mut self) -> Result<(), (String, usize, usize)> {
-			self.vm.memory.resize(6, 0); // initialize memory with 6 registers
+			self.vm.memory.resize(u16::max_value() as usize, 0); 
 
 			let mut idx = 0;
 			while idx < self.instructions.len() {
 				let i = &self.instructions[idx];
 
 				match i {
-					Instruction::MoveRight(num, token) => {
+					Instruction::MoveRight(mut num, token) => {
 						self.vm.pointer += num;
-
 						if self.vm.pointer >= self.vm.memory.len() {
-							self.vm.memory.resize(self.vm.pointer + 1, 0);
+							self.vm.pointer = self.vm.pointer - self.vm.memory.len();
 						}
 					},
 
 					Instruction::MoveLeft(mut num, token) => {
 						if num > self.vm.pointer {
 							num -= self.vm.pointer;
-							self.vm.pointer = self.vm.memory.len() - 1;
+							self.vm.pointer = self.vm.memory.len();
 						}
 
 						self.vm.pointer -= num;
@@ -70,13 +69,18 @@ pub mod vm {
 					Instruction::Increment(num, token) => {
 						let mut summation = self.vm.memory[self.vm.pointer] as usize + num;
 						if summation > u8::max_value() as usize {
-							summation -= u8::max_value() as usize;
+							summation -= u8::max_value() as usize + 1;
 						}
 
 						self.vm.memory[self.vm.pointer] = summation as u8;
 					},
 
 					Instruction::Decrement(mut num, token) => {
+						if num > self.vm.memory[self.vm.pointer] as usize {
+							num -= (self.vm.memory[self.vm.pointer] as usize) + 1;
+							self.vm.memory[self.vm.pointer] = u8::max_value();
+						}
+
 						self.vm.memory[self.vm.pointer] -= num as u8;
 					},
 
