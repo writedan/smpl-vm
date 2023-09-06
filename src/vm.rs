@@ -9,7 +9,7 @@ pub mod vm {
     #[derive(Debug)]
     struct Machine {
         pointer: usize,
-        memory: Vec<u8>,
+        memory: Vec<usize>,
     } // basic commands operate on the machine alone
 
     #[derive(Debug)]
@@ -47,6 +47,7 @@ pub mod vm {
             self.vm.memory.resize(u16::max_value() as usize, 0);
 
             let mut idx = 0;
+            let mut clock = 0;
             while idx < self.instructions.len() {
                 let i = &self.instructions[idx];
 
@@ -73,25 +74,40 @@ pub mod vm {
                             summation -= u8::max_value() as usize + 1;
                         }
 
-                        self.vm.memory[self.vm.pointer] = summation as u8;
+                        self.vm.memory[self.vm.pointer] = summation;
                     }
 
                     Instruction::Decrement(mut num, _) => {
                         if num > self.vm.memory[self.vm.pointer] as usize {
                             num -= (self.vm.memory[self.vm.pointer] as usize) + 1;
-                            self.vm.memory[self.vm.pointer] = u8::max_value();
+                            self.vm.memory[self.vm.pointer] = u8::max_value() as usize;
                         }
 
-                        self.vm.memory[self.vm.pointer] -= num as u8;
+                        self.vm.memory[self.vm.pointer] -= num;
                     }
 
                     Instruction::Output(token) => {
-                        print!("{}", self.vm.memory[self.vm.pointer] as char);
-                        match std::io::stdout().flush() {
-                            Ok(_) => {},
-                            Err(msg) => {
-                                if let Token::Output(line, character) = token {
-                                    return Err((format!("Runtime error flushing output: {}", msg), *line, *character));
+                        if self.vm.memory[self.vm.pointer] > u8::max_value() as usize {
+                            if let Token::Output(line, character) = token {
+                                return Err((format!("Runtime error: mem[{}] = {} > {}", self.vm.pointer, self.vm.memory[self.vm.pointer], u8::max_value()), *line, *character));
+                            } 
+                        } else {
+                            print!("{}", (self.vm.memory[self.vm.pointer] as u32) as u8 as char);
+                            match std::io::stdout().flush() {
+                                Ok(_) => {},
+                                Err(msg) => {
+                                       if let Token::Output(line, character) = token {
+                                          return Err((format!("Runtime error flushing output: {}", msg), *line, *character));
+                                      }
+                                 }
+                             }
+
+                            match std::io::stdout().flush() {
+                                Ok(_) => {},
+                                Err(msg) => {
+                                    if let Token::Output(line, character) = token {
+                                        return Err((format!("Runtime error flushing output: {}", msg), *line, *character));
+                                    }
                                 }
                             }
                         }
@@ -103,9 +119,9 @@ pub mod vm {
                         match stdin.lock().read_line(&mut line) {
                             Ok(_) => {
                                 line = format!("{}",line.trim());
-                                match line.bytes().nth(0) {
+                                match line.chars().nth(0) {
                                     Some(byte) => {
-                                        self.vm.memory[self.vm.pointer] = byte;
+                                        self.vm.memory[self.vm.pointer] = byte as usize;
                                     },
                                     None => {
                                         self.vm.memory[self.vm.pointer] = 0;
@@ -184,11 +200,12 @@ pub mod vm {
                             }
                         }
 
-                        self.vm.memory[self.vm.pointer] = address as u8;
+                        self.vm.memory[self.vm.pointer] = address;
                     }
                 }
 
                 idx += 1;
+                clock += 1;
             }
 
             Ok(())
