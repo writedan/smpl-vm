@@ -141,7 +141,7 @@ pub mod vm {
                     Instruction::Alloc(token) => {
                         let space_req = self.vm.memory[self.vm.pointer];
                         let base = idx;
-                        let mut freed = 0;
+                        let mut freed: usize = 0;
                         let mut address = 0;
                         for (idx, value) in self.vm.memory[(idx + 1)..].iter().enumerate() {
                             if value == &0 {
@@ -152,13 +152,13 @@ pub mod vm {
                                 address = 0;
                             }
 
-                            if freed == space_req {
-                                address -= freed as usize;
+                            if freed == space_req as usize {
+                                address -= freed;
                                 break;
                             }
                         }
 
-                        if freed < space_req {
+                        if freed < space_req as usize {
                             if let Token::Alloc(line, character) = token {
                                 return Err((
                                     format!(
