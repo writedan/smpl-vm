@@ -28,13 +28,16 @@ fn main() {
 
     let code: Vec<String> = io::BufReader::new(file).lines().map(|l| l.expect("Could not parse line.")).collect();
 
-    let mut program = Program::load(lexify(&code));
-    match program {
-    	Ok(mut program) => program.run(),
+    match Program::load(lexify(&code)) {
+    	Ok(mut program) => {
+    		program.run();
+    	},
     	Err((msg, line, character)) => {
-    		println!("Encountered an error while loading program on line {}.", line + 1);
+    		println!("Encountered an error while parsing program on line {}.", line + 1);
     		println!("{}", code[line]);
     		println!("{}^{} {}", "-".repeat(character), "-".repeat(code[line].len() - character -1), msg);
     	}
     }
+
+    println!("\nExecution completed.");
 }
