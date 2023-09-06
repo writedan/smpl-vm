@@ -59,6 +59,11 @@ pub mod vm {
 					},
 
 					Instruction::MoveLeft(mut num, token) => {
+						if num > self.vm.pointer {
+							num -= self.vm.pointer;
+							self.vm.pointer = self.vm.memory.len() - 1;
+						}
+
 						self.vm.pointer -= num;
 					},
 
