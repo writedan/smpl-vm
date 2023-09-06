@@ -67,7 +67,12 @@ pub mod vm {
 					},
 
 					Instruction::Increment(num, token) => {
-						self.vm.memory[self.vm.pointer] += *num as u8;
+						let mut summation = self.vm.memory[self.vm.pointer] as usize + num;
+						if summation > u8::max_value() as usize {
+							summation -= u8::max_value() as usize;
+						}
+
+						self.vm.memory[self.vm.pointer] = summation as u8;
 					},
 
 					Instruction::Decrement(mut num, token) => {
