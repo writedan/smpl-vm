@@ -1,6 +1,6 @@
 pub mod parser {
 	use crate::lexer::lexer::*;
-	use crate::vm::vm::*;
+	
 	use bimap::BiMap;
 	use std::mem::{discriminant,Discriminant};
 
@@ -26,55 +26,55 @@ pub mod parser {
 		while idx < tokens.len() {
 			let token = &tokens[idx];
 			match token {
-				Token::MoveRight(line, character) => {
+				Token::MoveRight(_, _) => {
 					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
 					idx += num - 1;
 					instr.push(Instruction::MoveRight(num, *token));
 				},
 
-				Token::MoveLeft(line, character) => {
+				Token::MoveLeft(_, _) => {
 					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
 					idx += num - 1;
 					instr.push(Instruction::MoveLeft(num, *token));
 				},
 
-				Token::Increment(line, character) => {
+				Token::Increment(_, _) => {
 					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
 					idx += num - 1;
 					instr.push(Instruction::Increment(num, *token));
 				},
 
-				Token::Decrement(line, chracter) => {
+				Token::Decrement(_, _) => {
 					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
 					idx += num - 1;
 					instr.push(Instruction::Decrement(num, *token));
 				}
 
-				Token::Output(line, character) => {
+				Token::Output(_, _) => {
 					instr.push(Instruction::Output(*token));
 				},
 
-				Token::Input(line, character) => {
+				Token::Input(_, _) => {
 					instr.push(Instruction::Input(*token));
 				},
 
-				Token::Branch(line, character) => {
+				Token::Branch(_, _) => {
 					instr.push(Instruction::Branch(*token));
 				},
 
-				Token::Return(line, character) => {
+				Token::Return(_, _) => {
 					instr.push(Instruction::Return(*token));
 				},
 
-				Token::Jump(line, character) => {
+				Token::Jump(_, _) => {
 					instr.push(Instruction::Jump(*token));
 				},
 
-				Token::Restore(line, character) => {
+				Token::Restore(_, _) => {
 					instr.push(Instruction::Restore(*token));
 				},
 
-				Token::Alloc(line, character) => {
+				Token::Alloc(_, _) => {
 					instr.push(Instruction::Alloc(*token));
 				},
 

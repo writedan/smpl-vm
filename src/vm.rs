@@ -50,14 +50,14 @@ pub mod vm {
 				let i = &self.instructions[idx];
 
 				match i {
-					Instruction::MoveRight(mut num, token) => {
+					Instruction::MoveRight(num, _) => {
 						self.vm.pointer += num;
 						if self.vm.pointer >= self.vm.memory.len() {
 							self.vm.pointer = self.vm.pointer - self.vm.memory.len();
 						}
 					},
 
-					Instruction::MoveLeft(mut num, token) => {
+					Instruction::MoveLeft(mut num, _) => {
 						if num > self.vm.pointer {
 							num -= self.vm.pointer;
 							self.vm.pointer = self.vm.memory.len();
@@ -66,7 +66,7 @@ pub mod vm {
 						self.vm.pointer -= num;
 					},
 
-					Instruction::Increment(num, token) => {
+					Instruction::Increment(num, _) => {
 						let mut summation = self.vm.memory[self.vm.pointer] as usize + num;
 						if summation > u8::max_value() as usize {
 							summation -= u8::max_value() as usize + 1;
@@ -75,7 +75,7 @@ pub mod vm {
 						self.vm.memory[self.vm.pointer] = summation as u8;
 					},
 
-					Instruction::Decrement(mut num, token) => {
+					Instruction::Decrement(mut num, _) => {
 						if num > self.vm.memory[self.vm.pointer] as usize {
 							num -= (self.vm.memory[self.vm.pointer] as usize) + 1;
 							self.vm.memory[self.vm.pointer] = u8::max_value();
@@ -84,14 +84,14 @@ pub mod vm {
 						self.vm.memory[self.vm.pointer] -= num as u8;
 					},
 
-					Instruction::Output(token) => {
+					Instruction::Output(_) => {
 						print!("{}", self.vm.memory[self.vm.pointer] as char);
 					},
 
 					Instruction::Input(token) => {
 						let mut input: [u8; 1] = [0];
 						match stdin().read(&mut input) {
-							Ok(read) => {
+							Ok(_read) => {
 								self.vm.memory[self.vm.pointer] = input[0];
 							},
 
@@ -103,19 +103,19 @@ pub mod vm {
 						}
 					},
 
-					Instruction::Branch(token) => {
+					Instruction::Branch(_) => {
 						if self.vm.memory[self.vm.pointer] == 0 {
 							idx = self.branches.get_by_left(&idx).unwrap() - 1 ;
 						}
 					},
 
-					Instruction::Return(token) => {
+					Instruction::Return(_) => {
 						if self.vm.memory[self.vm.pointer] != 0 {
 							idx = self.branches.get_by_right(&idx).unwrap() - 1;
 						}
 					},
 
-					Instruction::Jump(token) => {
+					Instruction::Jump(_) => {
 						self.jumps.push(self.vm.pointer);
 						self.vm.pointer = self.vm.memory[self.vm.pointer] as usize;
 					},

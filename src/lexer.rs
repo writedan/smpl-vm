@@ -1,5 +1,5 @@
 pub mod lexer {
-	use std::mem::{discriminant,Discriminant};
+	use std::mem::{discriminant};
 
 	#[derive(PartialEq, Debug, Copy, Clone)]
 	pub enum Token {

@@ -3,7 +3,7 @@ pub mod parser;
 pub mod vm;
 
 use crate::lexer::lexer::*;
-use crate::parser::parser::*;
+
 use crate::vm::vm::*;
 use std::env;
 use std::fs::File;
@@ -21,7 +21,7 @@ fn main() {
 	let path = Path::new(&args[1]);
 	let display = path.display();
 
-	let mut file = match File::open(&path) {
+	let file = match File::open(&path) {
         Err(why) => panic!("Failed to open {}: {}", display, why),
         Ok(file) => file,
     };
