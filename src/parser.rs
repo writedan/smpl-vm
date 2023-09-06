@@ -23,31 +23,44 @@ pub mod parser {
         let mut instr: Vec<Instruction> = Vec::new();
 
         let mut idx = 0;
+        let mut last_instruction = &Instruction::Branch(Token::Nop(0, 0));
         while idx < tokens.len() {
             let token = &tokens[idx];
             match token {
                 Token::MoveRight(_, _) => {
-                    let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-                    idx += num - 1;
-                    instr.push(Instruction::MoveRight(num, *token));
+                    if let Instruction::MoveRight(num, token) = last_instruction {
+                        instr.push(Instruction::MoveRight(num + 1, *token));
+                        instr.remove(instr.len() - 2);
+                    } else {
+                        instr.push(Instruction::MoveRight(1, *token));
+                    }
                 }
 
                 Token::MoveLeft(_, _) => {
-                    let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-                    idx += num - 1;
-                    instr.push(Instruction::MoveLeft(num, *token));
+                    if let Instruction::MoveLeft(num, token) = last_instruction {
+                        instr.push(Instruction::MoveLeft(num + 1, *token));
+                        instr.remove(instr.len() - 2);
+                    } else {
+                        instr.push(Instruction::MoveLeft(1, *token));
+                    }
                 }
 
                 Token::Increment(_, _) => {
-                    let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-                    idx += num - 1;
-                    instr.push(Instruction::Increment(num, *token));
+                    if let Instruction::Increment(num, token) = last_instruction {
+                        instr.push(Instruction::Increment(num + 1, *token));
+                        instr.remove(instr.len() - 2);
+                    } else {
+                        instr.push(Instruction::Increment(1, *token));
+                    }
                 }
 
                 Token::Decrement(_, _) => {
-                    let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-                    idx += num - 1;
-                    instr.push(Instruction::Decrement(num, *token));
+                    if let Instruction::Decrement(num, token) = last_instruction {
+                        instr.push(Instruction::Decrement(num + 1, *token));
+                        instr.remove(instr.len() - 2);
+                    } else {
+                        instr.push(Instruction::Decrement(1, *token));
+                    }
                 }
 
                 Token::Output(_, _) => {
@@ -86,27 +99,12 @@ pub mod parser {
                     ));
                 }
             }
-
+ 
+            last_instruction = instr.last().unwrap();
             idx += 1;
         }
 
         return Ok(instr);
-    }
-
-    fn count_tokens(tokens: Vec<Token>, token: Discriminant<Token>) -> usize {
-        let mut idx = 0;
-        let mut num = 0;
-        while idx < tokens.len() {
-            let tok = &tokens[idx];
-            if discriminant(tok) == token {
-                num += 1;
-                idx += 1;
-            } else {
-                break;
-            }
-        }
-
-        return num;
     }
 
     pub fn calculate_branches(
