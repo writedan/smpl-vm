@@ -131,10 +131,32 @@ pub mod vm {
 					},
 
 					Instruction::Alloc(token) => {
+						let space_req = self.vm.memory[self.vm.pointer];
+						let mut freed = 0;
+						let mut address = 0;
+						for (idx, value) in self.vm.memory[(idx + 1)..].iter().enumerate() {
+							if value == &0 {
+								freed += 1;
+								address = idx;
+							} else {
+								freed = 0;
+								address = 0;
+							}
 
-					},
+							if freed == space_req {
+								address -= freed as usize;
+								break;
+							}
+						}
 
-					_ => println!("todo: execute: {:?}", i)
+						if freed < space_req {
+							if let Token::Alloc(line, character) = token {
+								return Err((format!("Runtime error: insufficient memeory to free {} bytes.", space_req), *line, *character));
+							}
+						}
+
+						self.vm.memory[self.vm.pointer] = address as u8;
+					}
 				}
 
 				idx += 1;
