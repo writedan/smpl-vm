@@ -2,7 +2,7 @@ pub mod parser {
     use crate::lexer::lexer::*;
 
     use bimap::BiMap;
-    use std::mem::{discriminant, Discriminant};
+    use std::mem::{discriminant};
 
     #[derive(Debug)]
     pub enum Instruction {
@@ -104,7 +104,7 @@ pub mod parser {
             idx += 1;
         }
 
-        return Ok(instr);
+        Ok(instr)
     }
 
     pub fn calculate_branches(
@@ -137,30 +137,26 @@ pub mod parser {
                     if let Instruction::Branch(token) = instruction {
                         if let Token::Branch(line, character) = token {
                             return Err((
-                                format!("Branch ('[') has no return (']')"),
+                                "Branch ('[') has no return (']')".to_string(),
                                 *line,
                                 *character,
                             ));
                         }
                     }
                 }
-            } else if discriminant(instruction)
-                == discriminant(&Instruction::Return(Token::Nop(0, 0)))
-            {
-                if !branches.contains_right(&position) {
-                    if let Instruction::Return(token) = instruction {
-                        if let Token::Return(line, character) = token {
-                            return Err((
-                                format!("Return (']') has no branch ('[')"),
-                                *line,
-                                *character,
-                            ));
-                        }
+            } else if discriminant(instruction) == discriminant(&Instruction::Return(Token::Nop(0, 0))) && !branches.contains_right(&position) {
+                if let Instruction::Return(token) = instruction {
+                    if let Token::Return(line, character) = token {
+                        return Err((
+                            "Return (']') has no branch ('[')".to_string(),
+                            *line,
+                            *character,
+                        ));
                     }
                 }
             }
         }
 
-        return Ok(branches);
+        Ok(branches)
     }
 }

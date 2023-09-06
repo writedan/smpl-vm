@@ -2,9 +2,9 @@ pub mod vm {
     use crate::lexer::lexer::*;
     use crate::parser::parser::*;
     use bimap::BiMap;
-    use std::io::stdin;
+    
     use std::io::BufRead;
-    use std::io::{Read, Write};
+    use std::io::{Write};
 
     #[derive(Debug)]
     struct Machine {
@@ -33,8 +33,8 @@ pub mod vm {
             };
 
             Ok(Program {
-                instructions: instructions,
-                branches: branches,
+                instructions,
+                branches,
                 jumps: Vec::new(),
                 vm: Machine {
                     pointer: 0,
@@ -55,7 +55,7 @@ pub mod vm {
                     Instruction::MoveRight(num, _) => {
                         self.vm.pointer += num;
                         if self.vm.pointer >= self.vm.memory.len() {
-                            self.vm.pointer = self.vm.pointer - self.vm.memory.len();
+                            self.vm.pointer -= self.vm.memory.len();
                         }
                     }
 
@@ -69,7 +69,7 @@ pub mod vm {
                     }
 
                     Instruction::Increment(num, _) => {
-                        let mut summation = self.vm.memory[self.vm.pointer] as usize + num;
+                        let mut summation = self.vm.memory[self.vm.pointer] + num;
                         if summation > u8::max_value() as usize {
                             summation -= u8::max_value() as usize + 1;
                         }
@@ -78,8 +78,8 @@ pub mod vm {
                     }
 
                     Instruction::Decrement(mut num, _) => {
-                        if num > self.vm.memory[self.vm.pointer] as usize {
-                            num -= (self.vm.memory[self.vm.pointer] as usize) + 1;
+                        if num > self.vm.memory[self.vm.pointer] {
+                            num -= self.vm.memory[self.vm.pointer] + 1;
                             self.vm.memory[self.vm.pointer] = u8::max_value() as usize;
                         }
 
@@ -135,7 +135,7 @@ pub mod vm {
                         let stdin = std::io::stdin();
                         match stdin.lock().read_line(&mut line) {
                             Ok(_) => {
-                                line = format!("{}", line.trim());
+                                line = line.trim().to_string();
                                 match line.chars().nth(0) {
                                     Some(byte) => {
                                         self.vm.memory[self.vm.pointer] = byte as usize;
@@ -171,20 +171,18 @@ pub mod vm {
 
                     Instruction::Jump(_) => {
                         self.jumps.push(self.vm.pointer);
-                        self.vm.pointer = self.vm.memory[self.vm.pointer] as usize;
+                        self.vm.pointer = self.vm.memory[self.vm.pointer];
                     }
 
                     Instruction::Restore(token) => {
                         if let Some(jump) = self.jumps.pop() {
                             self.vm.pointer = jump;
-                        } else {
-                            if let Token::Restore(line, character) = token {
-                                return Err((
-                                    format!("Runtime error: no saved jumps."),
-                                    *line,
-                                    *character,
-                                ));
-                            }
+                        } else if let Token::Restore(line, character) = token {
+                            return Err((
+                                "Runtime error: no saved jumps.".to_string(),
+                                *line,
+                                *character,
+                            ));
                         }
                     }
 
@@ -202,13 +200,13 @@ pub mod vm {
                                 address = 0;
                             }
 
-                            if freed == space_req as usize {
+                            if freed == space_req {
                                 address -= freed;
                                 break;
                             }
                         }
 
-                        if freed < space_req as usize {
+                        if freed < space_req {
                             if let Token::Alloc(line, character) = token {
                                 return Err((
                                     format!(

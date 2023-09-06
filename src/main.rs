@@ -20,7 +20,7 @@ fn main() {
     let path = Path::new(&args[1]);
     let display = path.display();
 
-    let file = match File::open(&path) {
+    let file = match File::open(path) {
         Err(why) => panic!("Failed to open {}: {}", display, why),
         Ok(file) => file,
     };

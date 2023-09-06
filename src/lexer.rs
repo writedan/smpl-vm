@@ -39,9 +39,9 @@ pub mod lexer {
             }
         }
 
-        return tokens
+        tokens
             .into_iter()
             .filter(|token| discriminant(token) != discriminant(&Token::Nop(0, 0)))
-            .collect::<Vec<Token>>();
+            .collect::<Vec<Token>>()
     }
 }
