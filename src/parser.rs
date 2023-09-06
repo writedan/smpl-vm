@@ -1,148 +1,168 @@
 pub mod parser {
-	use crate::lexer::lexer::*;
-	
-	use bimap::BiMap;
-	use std::mem::{discriminant,Discriminant};
+    use crate::lexer::lexer::*;
 
-	#[derive(Debug)]
-	pub enum Instruction {
-		MoveRight(usize, Token),	// pointer += 1
-		MoveLeft(usize, Token),		// pointer -= 1
-		Increment(usize, Token),	// memory[pointer] += 1
-		Decrement(usize, Token),	// memory[pointer] -= 1
-		Output(Token),				// print memory[pointer]
-		Input(Token),				// input -> memory[pointer]
-		Branch(Token),				// if memory[pointer] = 0, jump to matching ]
-		Return(Token),				// if memory[pointer] != 0, jump to matchong [
-		Jump(Token),				// pointer = memory[pointer]
-		Restore(Token),				// restore pointer to value before jump
-		Alloc(Token),				// memory[pointer] = address of first `memory[pointer]` empty cells
-	} // usize field is how many times in a row the token appears; Token is a reference to the corresponding token for its line and character index
+    use bimap::BiMap;
+    use std::mem::{discriminant, Discriminant};
 
-	pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, (String, usize, usize)> {
-		let mut instr: Vec<Instruction> = Vec::new();
+    #[derive(Debug)]
+    pub enum Instruction {
+        MoveRight(usize, Token), // pointer += 1
+        MoveLeft(usize, Token),  // pointer -= 1
+        Increment(usize, Token), // memory[pointer] += 1
+        Decrement(usize, Token), // memory[pointer] -= 1
+        Output(Token),           // print memory[pointer]
+        Input(Token),            // input -> memory[pointer]
+        Branch(Token),           // if memory[pointer] = 0, jump to matching ]
+        Return(Token),           // if memory[pointer] != 0, jump to matchong [
+        Jump(Token),             // pointer = memory[pointer]
+        Restore(Token),          // restore pointer to value before jump
+        Alloc(Token),            // memory[pointer] = address of first `memory[pointer]` empty cells
+    } // usize field is how many times in a row the token appears; Token is a reference to the corresponding token for its line and character index
 
-		let mut idx = 0;
-		while idx < tokens.len() {
-			let token = &tokens[idx];
-			match token {
-				Token::MoveRight(_, _) => {
-					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-					idx += num - 1;
-					instr.push(Instruction::MoveRight(num, *token));
-				},
+    pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, (String, usize, usize)> {
+        let mut instr: Vec<Instruction> = Vec::new();
 
-				Token::MoveLeft(_, _) => {
-					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-					idx += num - 1;
-					instr.push(Instruction::MoveLeft(num, *token));
-				},
+        let mut idx = 0;
+        while idx < tokens.len() {
+            let token = &tokens[idx];
+            match token {
+                Token::MoveRight(_, _) => {
+                    let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
+                    idx += num - 1;
+                    instr.push(Instruction::MoveRight(num, *token));
+                }
 
-				Token::Increment(_, _) => {
-					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-					idx += num - 1;
-					instr.push(Instruction::Increment(num, *token));
-				},
+                Token::MoveLeft(_, _) => {
+                    let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
+                    idx += num - 1;
+                    instr.push(Instruction::MoveLeft(num, *token));
+                }
 
-				Token::Decrement(_, _) => {
-					let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
-					idx += num - 1;
-					instr.push(Instruction::Decrement(num, *token));
-				}
+                Token::Increment(_, _) => {
+                    let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
+                    idx += num - 1;
+                    instr.push(Instruction::Increment(num, *token));
+                }
 
-				Token::Output(_, _) => {
-					instr.push(Instruction::Output(*token));
-				},
+                Token::Decrement(_, _) => {
+                    let num = count_tokens(tokens[idx..].to_vec(), discriminant(token));
+                    idx += num - 1;
+                    instr.push(Instruction::Decrement(num, *token));
+                }
 
-				Token::Input(_, _) => {
-					instr.push(Instruction::Input(*token));
-				},
+                Token::Output(_, _) => {
+                    instr.push(Instruction::Output(*token));
+                }
 
-				Token::Branch(_, _) => {
-					instr.push(Instruction::Branch(*token));
-				},
+                Token::Input(_, _) => {
+                    instr.push(Instruction::Input(*token));
+                }
 
-				Token::Return(_, _) => {
-					instr.push(Instruction::Return(*token));
-				},
+                Token::Branch(_, _) => {
+                    instr.push(Instruction::Branch(*token));
+                }
 
-				Token::Jump(_, _) => {
-					instr.push(Instruction::Jump(*token));
-				},
+                Token::Return(_, _) => {
+                    instr.push(Instruction::Return(*token));
+                }
 
-				Token::Restore(_, _) => {
-					instr.push(Instruction::Restore(*token));
-				},
+                Token::Jump(_, _) => {
+                    instr.push(Instruction::Jump(*token));
+                }
 
-				Token::Alloc(_, _) => {
-					instr.push(Instruction::Alloc(*token));
-				},
+                Token::Restore(_, _) => {
+                    instr.push(Instruction::Restore(*token));
+                }
 
-				Token::Nop(line, character) => {
-					return Err((format!("Unexpected token {:?} encountered", token), *line, *character));
-				}
-			}
+                Token::Alloc(_, _) => {
+                    instr.push(Instruction::Alloc(*token));
+                }
 
-			idx += 1;
-		}
+                Token::Nop(line, character) => {
+                    return Err((
+                        format!("Unexpected token {:?} encountered", token),
+                        *line,
+                        *character,
+                    ));
+                }
+            }
 
-		return Ok(instr);
-	}
+            idx += 1;
+        }
 
-	fn count_tokens(tokens: Vec<Token>, token: Discriminant<Token>) -> usize {
-		let mut idx = 0;
-		let mut num = 0;
-		while idx < tokens.len() {
-			let tok = &tokens[idx];
-			if discriminant(tok) == token {
-				num += 1;
-				idx += 1;
-			} else {
-				break;
-			}
-		}
+        return Ok(instr);
+    }
 
-		return num;
-	}
+    fn count_tokens(tokens: Vec<Token>, token: Discriminant<Token>) -> usize {
+        let mut idx = 0;
+        let mut num = 0;
+        while idx < tokens.len() {
+            let tok = &tokens[idx];
+            if discriminant(tok) == token {
+                num += 1;
+                idx += 1;
+            } else {
+                break;
+            }
+        }
 
-	pub fn calculate_branches(instr: &Vec<Instruction>) -> Result<BiMap<usize, usize>, (String, usize, usize)> {
-		let mut branches: BiMap<usize, usize> = BiMap::new();
+        return num;
+    }
 
-		for (position, instruction) in instr.iter().enumerate() {
-			if discriminant(instruction) == discriminant(&Instruction::Branch(Token::Nop(0,0))) {
-				let open = position;
-				let mut offset = 0;
-				for (position, instruction) in instr[position + 1..].iter().enumerate() {
-					if discriminant(instruction) == discriminant(&Instruction::Branch(Token::Nop(0,0))) {
-						offset += 1;
-					} else if discriminant(instruction) == discriminant(&Instruction::Return(Token::Nop(0,0))) {
-						if offset == 0 {
-							branches.insert(open, position + open + 1);
-							break;
-						} else {
-							offset -= 1;
-						}
-					}
-				}
+    pub fn calculate_branches(
+        instr: &Vec<Instruction>,
+    ) -> Result<BiMap<usize, usize>, (String, usize, usize)> {
+        let mut branches: BiMap<usize, usize> = BiMap::new();
 
-				if !branches.contains_left(&open) {
-					if let Instruction::Branch(token) = instruction {
-						if let Token::Branch(line, character) = token {
-							return Err((format!("Branch ('[') has no return (']')"), *line, *character));
-						}
-					}
-				}
-			} else if discriminant(instruction) == discriminant(&Instruction::Return(Token::Nop(0,0))) {
-				if !branches.contains_right(&position) {
-					if let Instruction::Return(token) = instruction {
-						if let Token::Return(line, character) = token {
-							return Err((format!("Return (']') has no branch ('[')"), *line, *character));
-						}
-					}
-				}
-			}
-		}
+        for (position, instruction) in instr.iter().enumerate() {
+            if discriminant(instruction) == discriminant(&Instruction::Branch(Token::Nop(0, 0))) {
+                let open = position;
+                let mut offset = 0;
+                for (position, instruction) in instr[position + 1..].iter().enumerate() {
+                    if discriminant(instruction)
+                        == discriminant(&Instruction::Branch(Token::Nop(0, 0)))
+                    {
+                        offset += 1;
+                    } else if discriminant(instruction)
+                        == discriminant(&Instruction::Return(Token::Nop(0, 0)))
+                    {
+                        if offset == 0 {
+                            branches.insert(open, position + open + 1);
+                            break;
+                        } else {
+                            offset -= 1;
+                        }
+                    }
+                }
 
-		return Ok(branches);
-	}
+                if !branches.contains_left(&open) {
+                    if let Instruction::Branch(token) = instruction {
+                        if let Token::Branch(line, character) = token {
+                            return Err((
+                                format!("Branch ('[') has no return (']')"),
+                                *line,
+                                *character,
+                            ));
+                        }
+                    }
+                }
+            } else if discriminant(instruction)
+                == discriminant(&Instruction::Return(Token::Nop(0, 0)))
+            {
+                if !branches.contains_right(&position) {
+                    if let Instruction::Return(token) = instruction {
+                        if let Token::Return(line, character) = token {
+                            return Err((
+                                format!("Return (']') has no branch ('[')"),
+                                *line,
+                                *character,
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+
+        return Ok(branches);
+    }
 }
