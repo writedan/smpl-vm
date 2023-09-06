@@ -56,10 +56,6 @@ pub mod vm {
 						if self.vm.pointer >= self.vm.memory.len() {
 							self.vm.memory.resize(self.vm.pointer + 1, 0);
 						}
-
-						if self.vm.memory.len() >= u8::max_value() as usize {
-							self.vm.pointer = self.vm.memory.len() - u8::max_value() as usize;
-						}
 					},
 
 					Instruction::MoveLeft(mut num, token) => {
